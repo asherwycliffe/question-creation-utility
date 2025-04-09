@@ -87,7 +87,7 @@
         });
 
         const data = await res.json();
-        responseDiv.innerHTML = `<strong>AI says:</strong> ${data.answer || "No response returned."}`;
+        responseDiv.innerHTML = `<strong>AI says:</strong><br>${(data.answer || "No response returned.").replace(/\n/g, "<br>")}`;
       } catch (error) {
         responseDiv.textContent = "Error: " + error.message;
       }
