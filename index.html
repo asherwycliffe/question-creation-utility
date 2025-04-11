@@ -64,67 +64,67 @@
   </form>
 
   <div id="response">
-  <p id="outputQuestion"></p>
-  <button id="downloadBtn" style="display:none; margin-top: 1rem;">Download Question</button>
-</div>
-
+    <p id="outputQuestion"></p>
+    <button id="downloadBtn" style="display:none; margin-top: 1rem;">Download Question</button>
+  </div>
 
   <script>
-  document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("aiForm");
+      const difficultyInput = document.getElementById("difficulty");
+      const questionInput = document.getElementById("question");
+      const responseDiv = document.getElementById("response");
+      const outputQuestion = document.getElementById("outputQuestion");
+      const downloadBtn = document.getElementById("downloadBtn");
 
-    document.getElementById('aiForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-      const difficulty = document.getElementById('difficulty').value;
-      const question = document.getElementById('question').value;
-      const responseDiv = document.getElementById('response');
-      const form = document.getElementById('aiForm');
+        const difficulty = difficultyInput.value;
+        const question = questionInput.value;
 
-      document.getElementById("outputQuestion").innerHTML = "Thinking...";
-      document.getElementById("downloadBtn").style.display = "none";
-      form.classList.add("loading");
+        outputQuestion.innerHTML = "Thinking...";
+        downloadBtn.style.display = "none";
+        form.classList.add("loading");
 
-      try {
-        const res = await fetch("https://asherw.app.n8n.cloud/webhook/question", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ difficulty, question })
-        });
+        try {
+          const res = await fetch("https://asherw.app.n8n.cloud/webhook/question", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ difficulty, question })
+          });
 
-        const data = await res.json();
-        document.getElementById("outputQuestion").innerHTML = `<strong>AI says:</strong><br>${(data.answer || "No response returned.").replace(/\n/g, "<br>")}`;
-        document.getElementById("downloadBtn").style.display = "inline-block";
-      } catch (error) {
-        document.getElementById("outputQuestion").textContent = "Error: " + error.message;
-      }
+          const data = await res.json();
+          outputQuestion.innerHTML = `<strong>AI says:</strong><br>${(data.answer || "No response returned.").replace(/\n/g, "<br>")}`;
+          downloadBtn.style.display = "inline-block";
+        } catch (error) {
+          responseDiv.textContent = "Error: " + error.message;
+        }
 
-      form.classList.remove("loading");
+        form.classList.remove("loading");
+      });
+
+      downloadBtn.addEventListener("click", () => {
+        const questionText = outputQuestion.textContent;
+        if (questionText.trim() !== "") {
+          const blob = new Blob([questionText], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "formatted_question.txt";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          URL.revokeObjectURL(url);
+        }
+      });
     });
-
-    function downloadQuestionAsFile(questionText) {
-      const blob = new Blob([questionText], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "formatted_question.txt";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
-
-    document.getElementById("downloadBtn").addEventListener("click", () => {
-      const questionText = document.getElementById("outputQuestion").textContent;
-      if (questionText.trim() !== "") {
-        downloadQuestionAsFile(questionText);
-      }
-    });
-
-  });
-</script>
-
+  </script>
 
 </body>
 </html>
+
