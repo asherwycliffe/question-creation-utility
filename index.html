@@ -70,6 +70,8 @@
 
 
   <script>
+  document.addEventListener("DOMContentLoaded", () => {
+
     document.getElementById('aiForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -81,7 +83,6 @@
       document.getElementById("outputQuestion").innerHTML = "Thinking...";
       document.getElementById("downloadBtn").style.display = "none";
       form.classList.add("loading");
-      
 
       try {
         const res = await fetch("https://asherw.app.n8n.cloud/webhook/question", {
@@ -96,31 +97,34 @@
         document.getElementById("outputQuestion").innerHTML = `<strong>AI says:</strong><br>${(data.answer || "No response returned.").replace(/\n/g, "<br>")}`;
         document.getElementById("downloadBtn").style.display = "inline-block";
       } catch (error) {
-        responseDiv.textContent = "Error: " + error.message;
+        document.getElementById("outputQuestion").textContent = "Error: " + error.message;
       }
 
       form.classList.remove("loading");
     });
+
     function downloadQuestionAsFile(questionText) {
-    const blob = new Blob([questionText], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "formatted_question.txt";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    URL.revokeObjectURL(url);
+      const blob = new Blob([questionText], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "formatted_question.txt";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
+
     document.getElementById("downloadBtn").addEventListener("click", () => {
-    const questionText = document.getElementById("outputQuestion").textContent;
-    if (questionText.trim() !== "") {
+      const questionText = document.getElementById("outputQuestion").textContent;
+      if (questionText.trim() !== "") {
         downloadQuestionAsFile(questionText);
-    }
+      }
     });
-  </script>
+
+  });
+</script>
+
 
 </body>
 </html>
