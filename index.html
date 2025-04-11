@@ -65,6 +65,7 @@
 
   <div id="response">
     <p id="outputQuestion"></p>
+    <pre id="rawText" style="display:none;"></pre>
     <button id="downloadBtn" style="display:none; margin-top: 1rem;">Download Question</button>
   </div>
 
@@ -75,6 +76,7 @@
       const questionInput = document.getElementById("question");
       const responseDiv = document.getElementById("response");
       const outputQuestion = document.getElementById("outputQuestion");
+      const rawText = document.getElementById("rawText");
       const downloadBtn = document.getElementById("downloadBtn");
 
       form.addEventListener("submit", async function (e) {
@@ -84,6 +86,7 @@
         const question = questionInput.value;
 
         outputQuestion.innerHTML = "Thinking...";
+        rawText.innerText = "";
         downloadBtn.style.display = "none";
         form.classList.add("loading");
 
@@ -97,7 +100,12 @@
           });
 
           const data = await res.json();
-          outputQuestion.innerHTML = `<strong>AI says:</strong><br>${(data.answer || "No response returned.").replace(/\n/g, "<br>")}`;
+          const formattedAnswer = data.answer || "No response returned.";
+
+          outputQuestion.innerHTML = `<strong>AI says:</strong><br>${formattedAnswer.replace(/\n/g, "<br>")}`;
+
+          rawText.innerText = `AI says:\n${formattedAnswer}`;
+
           downloadBtn.style.display = "inline-block";
         } catch (error) {
           responseDiv.textContent = "Error: " + error.message;
@@ -107,7 +115,7 @@
       });
 
       downloadBtn.addEventListener("click", () => {
-        const questionText = outputQuestion.textContent;
+        const questionText = rawText.innerText;
         if (questionText.trim() !== "") {
           const blob = new Blob([questionText], { type: "text/plain" });
           const url = URL.createObjectURL(blob);
@@ -127,4 +135,3 @@
 
 </body>
 </html>
-
