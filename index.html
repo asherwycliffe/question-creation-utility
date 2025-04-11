@@ -70,68 +70,77 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.getElementById("aiForm");
-      const difficultyInput = document.getElementById("difficulty");
-      const questionInput = document.getElementById("question");
-      const responseDiv = document.getElementById("response");
-      const outputQuestion = document.getElementById("outputQuestion");
-      const rawText = document.getElementById("rawText");
-      const downloadBtn = document.getElementById("downloadBtn");
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("aiForm");
+    const difficultyInput = document.getElementById("difficulty");
+    const questionInput = document.getElementById("question");
+    const responseDiv = document.getElementById("response");
+    const outputQuestion = document.getElementById("outputQuestion");
+    const rawText = document.getElementById("rawText");
+    const downloadBtn = document.getElementById("downloadBtn");
 
-      form.addEventListener("submit", async function (e) {
-        e.preventDefault();
+    const stripMarkdown = (text) => {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '$1') // bold
+        .replace(/`{1,3}([\s\S]*?)`{1,3}/g, '$1') // inline & block code
+        .replace(/_(.*?)_/g, '$1') // italic
+        .replace(/^#+\s/gm, '') // headers
+        .replace(/\r\n|\r|\n/g, '\n'); // normalize newlines
+    };
 
-        const difficulty = difficultyInput.value;
-        const question = questionInput.value;
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-        outputQuestion.innerHTML = "Thinking...";
-        rawText.innerText = "";
-        downloadBtn.style.display = "none";
-        form.classList.add("loading");
+      const difficulty = difficultyInput.value;
+      const question = questionInput.value;
 
-        try {
-          const res = await fetch("https://asherw.app.n8n.cloud/webhook/question", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ difficulty, question })
-          });
+      outputQuestion.innerHTML = "Thinking...";
+      rawText.innerText = "";
+      downloadBtn.style.display = "none";
+      form.classList.add("loading");
 
-          const data = await res.json();
-          const formattedAnswer = data.answer || "No response returned.";
+      try {
+        const res = await fetch("https://asherw.app.n8n.cloud/webhook/question", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ difficulty, question })
+        });
 
-          outputQuestion.innerHTML = `<strong>AI says:</strong><br>${formattedAnswer.replace(/\n/g, "<br>")}`;
+        const data = await res.json();
+        const formattedAnswer = data.answer || "No response returned.";
 
-          rawText.innerText = `AI says:\n${formattedAnswer}`;
+        outputQuestion.innerHTML = `<strong>AI says:</strong><br>${formattedAnswer.replace(/\n/g, "<br>")}`;
+        rawText.innerText = `AI says:\n${stripMarkdown(formattedAnswer)}`;
 
-          downloadBtn.style.display = "inline-block";
-        } catch (error) {
-          responseDiv.textContent = "Error: " + error.message;
-        }
+        downloadBtn.style.display = "inline-block";
+      } catch (error) {
+        responseDiv.textContent = "Error: " + error.message;
+      }
 
-        form.classList.remove("loading");
-      });
-
-      downloadBtn.addEventListener("click", () => {
-        const questionText = rawText.innerText;
-        if (questionText.trim() !== "") {
-          const blob = new Blob([questionText], { type: "text/plain" });
-          const url = URL.createObjectURL(blob);
-
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "formatted_question.txt";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          URL.revokeObjectURL(url);
-        }
-      });
+      form.classList.remove("loading");
     });
-  </script>
+
+    downloadBtn.addEventListener("click", () => {
+      const questionText = rawText.innerText;
+      if (questionText.trim() !== "") {
+        const blob = new Blob([questionText], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "formatted_question.txt";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+      }
+    });
+  });
+</script>
+
 
 </body>
 </html>
