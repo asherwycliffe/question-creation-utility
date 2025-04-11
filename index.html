@@ -78,8 +78,10 @@
       const responseDiv = document.getElementById('response');
       const form = document.getElementById('aiForm');
 
-      responseDiv.textContent = "Thinking...";
+      document.getElementById("outputQuestion").innerHTML = "Thinking...";
+      document.getElementById("downloadBtn").style.display = "none";
       form.classList.add("loading");
+      
 
       try {
         const res = await fetch("https://asherw.app.n8n.cloud/webhook/question", {
