@@ -126,9 +126,14 @@
   const questionText = rawText.innerText;
   if (questionText.trim() !== "") {
     const escapedContent = questionText
-      .split("\n")
-      .map(line => `<p>${line.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`)
-      .join("");
+  .split(/\n\s*\n/) // Split on empty lines to preserve paragraph breaks
+  .map(paragraph => {
+    const lines = paragraph.split("\n").map(line =>
+      line.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    );
+    return `<p>${lines.join("<br>")}</p>`;
+  })
+  .join("\n");
 
     const htmlContent = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office'
