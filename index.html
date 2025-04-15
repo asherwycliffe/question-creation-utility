@@ -125,20 +125,30 @@
     downloadBtn.addEventListener("click", () => {
   const questionText = rawText.innerText;
   if (questionText.trim() !== "") {
-    const header = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-            xmlns:w='urn:schemas-microsoft-com:office:word' 
+    const escapedContent = questionText
+      .split("\n")
+      .map(line => `<p>${line.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`)
+      .join("");
+
+    const htmlContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office'
+            xmlns:w='urn:schemas-microsoft-com:office:word'
             xmlns='http://www.w3.org/TR/REC-html40'>
-      <head><meta charset='utf-8'></head><body>`;
-    const footer = "</body></html>";
-    const htmlContent = header + questionText.replace(/\n/g, "<br>") + footer;
+        <head>
+          <meta charset='utf-8'>
+          <title>Exported Question</title>
+        </head>
+        <body>
+          <h2>Generated Question & Test Cases</h2>
+          ${escapedContent}
+        </body>
+      </html>`;
 
     const blob = new Blob(['\ufeff', htmlContent], {
       type: 'application/msword'
     });
 
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
     link.href = url;
     link.download = "question_output.doc";
@@ -149,6 +159,7 @@
     URL.revokeObjectURL(url);
   }
 });
+
 
   });
 </script>
